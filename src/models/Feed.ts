@@ -1,0 +1,12 @@
+import mongoose from 'mongoose';
+
+const feedSchema = new mongoose.Schema({
+  title: { type: String, required: true, trim: true, maxLength: 30 },
+  text: { type: String, required: true, trim: true, minLength: 10 },
+  imageUrl: { type: String },
+  createdAt: { type: Date, required: true, default: Date.now },
+  likes: { type: Number },
+});
+
+const Feed = mongoose.model('Feed', feedSchema);
+export default Feed;
