@@ -30,8 +30,9 @@ export const getFeed = async (req, res) => {
 export const uploadFeed = async (req, res) => {
   const newFeed = {
     id: feeds[feeds.length - 1].id + 1,
-    title: 'second',
-    text: 'This is me!',
+    title: req.body.title,
+    text: req.body.text,
+    photo: req.file.path,
     createdAt: 'just now',
     likes: 0,
   };
@@ -39,6 +40,7 @@ export const uploadFeed = async (req, res) => {
 
   return res.send(feeds);
 };
+
 export const updateFeed = async (req, res) => {
   const { id } = req.params;
   feeds = feeds.map((f) => {
