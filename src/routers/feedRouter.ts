@@ -6,12 +6,13 @@ import {
   updateFeed,
   deleteFeed,
 } from '../controllers/feedController';
+import { photoUpload } from '../server/middlewares';
 
 const feedRouter = express.Router();
 
 feedRouter.get('/', getFeeds);
 feedRouter.get('/:id', getFeed);
-feedRouter.post('/', uploadFeed);
+feedRouter.post('/', photoUpload.single('photo'), uploadFeed);
 feedRouter.put('/:id', updateFeed);
 feedRouter.delete('/:id', deleteFeed);
 
