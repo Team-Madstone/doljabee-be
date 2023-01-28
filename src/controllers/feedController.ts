@@ -5,27 +5,34 @@ export const getFeeds = async (req, res) => {
   try {
     return res.send(feeds);
   } catch (error) {
-    return res.status(404);
+    return res.sendStatus(404);
   }
 };
 
 export const getFeed = async (req, res) => {
   const { id } = req.params;
   const feed = await Feed.findById(id);
-  return res.send(feed);
+  try {
+    return res.send(feed);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
 
 export const uploadFeed = async (req, res) => {
   const { title, text } = req.body;
   const { path } = req.file;
-  const newFeed = await Feed.create({
-    title,
-    text,
-    photo: path,
-    likes: 0,
-  });
-
-  return res.send(newFeed);
+  try {
+    const newFeed = await Feed.create({
+      title,
+      text,
+      photo: path,
+      likes: 0,
+    });
+    return res.send(newFeed);
+  } catch (error) {
+    return res.sendStatus(400);
+  }
 };
 
 export const updateFeed = async (req, res) => {
@@ -37,13 +44,16 @@ export const updateFeed = async (req, res) => {
     return res.sendStatus(404);
   }
 
-  const updatedFeed = await Feed.findByIdAndUpdate(id, {
-    title,
-    text,
-    photo: path,
-  });
-
-  return res.send(updatedFeed);
+  try {
+    const updatedFeed = await Feed.findByIdAndUpdate(id, {
+      title,
+      text,
+      photo: path,
+    });
+    return res.send(updatedFeed);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
 
 export const deleteFeed = async (req, res) => {
@@ -52,6 +62,11 @@ export const deleteFeed = async (req, res) => {
   if (!feeds) {
     return res.sendStatus(404);
   }
-  await Feed.findByIdAndDelete(_id);
-  return res.sendStatus('200');
+
+  try {
+    await Feed.findByIdAndDelete(_id);
+    return res.sendStatus('200');
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
