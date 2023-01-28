@@ -1,59 +1,57 @@
 import Feed from '../models/Feed';
 
-let feeds = [
-  {
-    id: 1,
-    title: 'first',
-    text: 'hello! how are you?',
-    createdAt: 'just now',
-    likes: 0,
-  },
-  {
-    id: 2,
-    title: 'second',
-    text: 'This is me!',
-    createdAt: 'just now',
-    likes: 0,
-  },
-];
-
 export const getFeeds = async (req, res) => {
-  return res.send(feeds);
+  const feeds = await Feed.find({});
+  try {
+    return res.send(feeds);
+  } catch (error) {
+    return res.status(404);
+  }
 };
 
 export const getFeed = async (req, res) => {
   const { id } = req.params;
-  const feed = feeds.find((f) => f.id === Number(id));
+  const feed = await Feed.findById(id);
   return res.send(feed);
 };
 
 export const uploadFeed = async (req, res) => {
-  const newFeed = {
-    id: feeds[feeds.length - 1].id + 1,
-    title: req.body.title,
-    text: req.body.text,
-    photo: req.file.path,
-    createdAt: 'just now',
+  const { title, text } = req.body;
+  const { path } = req.file;
+  const newFeed = await Feed.create({
+    title,
+    text,
+    photo: path,
     likes: 0,
-  };
-  feeds.push(newFeed);
+  });
 
-  return res.send(feeds);
+  return res.send(newFeed);
 };
 
 export const updateFeed = async (req, res) => {
   const { id } = req.params;
-  feeds = feeds.map((f) => {
-    if (f.id === Number(id)) {
-      f.title = 'updated';
-    }
-    return f;
+  const { title, text } = req.body;
+  const { path } = req.file || '';
+  const feed = await Feed.findById(id);
+  if (!feed) {
+    return res.sendStatus(404);
+  }
+
+  const updatedFeed = await Feed.findByIdAndUpdate(id, {
+    title,
+    text,
+    photo: path,
   });
 
-  return res.send(feeds);
+  return res.send(updatedFeed);
 };
+
 export const deleteFeed = async (req, res) => {
-  const { id } = req.params;
-  feeds = feeds.filter((f) => f.id !== Number(id));
-  return res.send(feeds);
+  const { _id } = req.body;
+  const feeds = await Feed.findById(_id);
+  if (!feeds) {
+    return res.sendStatus(404);
+  }
+  await Feed.findByIdAndDelete(_id);
+  return res.sendStatus('200');
 };
