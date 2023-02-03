@@ -38,7 +38,9 @@ export const uploadFeed = async (req, res) => {
 export const updateFeed = async (req, res) => {
   const { id } = req.params;
   const { title, text } = req.body;
-  const { path } = req.file || '';
+  const file = req.file;
+  const path = file && file.path;
+
   const feed = await Feed.findById(id);
   if (!feed) {
     return res.sendStatus(404);
