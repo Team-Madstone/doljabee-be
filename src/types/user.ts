@@ -21,3 +21,7 @@ export type TSignupVariables = {
   callbackUrl: string;
   token: string;
 };
+
+export type TTokenPayload = {
+  email: string;
+};
