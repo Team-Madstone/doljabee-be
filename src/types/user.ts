@@ -11,3 +11,13 @@ export type TUserVariables = Omit<TUser, 'verifyEmail'>;
 export type TCreateUserVariables = TUserVariables & {
   callbackUrl: string;
 };
+
+export type TSendVerifyEmail = {
+  email: string;
+  callbackUrl: string;
+};
+
+export type TSignupVariables = {
+  callbackUrl: string;
+  token: string;
+};
