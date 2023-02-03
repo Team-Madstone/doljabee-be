@@ -1,57 +1,75 @@
+import { Request, Response } from 'express';
 import Feed from '../models/Feed';
 
-let feeds = [
-  {
-    id: 1,
-    title: 'first',
-    text: 'hello! how are you?',
-    createdAt: 'just now',
-    likes: 0,
-  },
-  {
-    id: 2,
-    title: 'second',
-    text: 'This is me!',
-    createdAt: 'just now',
-    likes: 0,
-  },
-];
-
-export const getFeeds = async (req, res) => {
-  return res.send(feeds);
+export const getFeeds = async (req: Request, res: Response) => {
+  const feeds = await Feed.find({});
+  try {
+    return res.send(feeds);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
 
-export const getFeed = async (req, res) => {
+export const getFeed = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const feed = feeds.find((f) => f.id === Number(id));
-  return res.send(feed);
+  const feed = await Feed.findById(id);
+  try {
+    return res.send(feed);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
 
-export const uploadFeed = async (req, res) => {
-  const newFeed = {
-    id: feeds[feeds.length - 1].id + 1,
-    title: 'second',
-    text: 'This is me!',
-    createdAt: 'just now',
-    likes: 0,
-  };
-  feeds.push(newFeed);
-
-  return res.send(feeds);
+export const uploadFeed = async (req: Request, res: Response) => {
+  const { title, text } = req.body;
+  const { path } = req.file;
+  try {
+    const newFeed = await Feed.create({
+      title,
+      text,
+      photo: path,
+      likes: 0,
+    });
+    return res.send(newFeed);
+  } catch (error) {
+    return res.sendStatus(400);
+  }
 };
-export const updateFeed = async (req, res) => {
+
+export const updateFeed = async (req: Request, res: Response) => {
   const { id } = req.params;
-  feeds = feeds.map((f) => {
-    if (f.id === Number(id)) {
-      f.title = 'updated';
-    }
-    return f;
-  });
+  const { title, text } = req.body;
+  const file = req.file;
+  const path = file && file.path;
 
-  return res.send(feeds);
+  const feed = await Feed.findById(id);
+  if (!feed) {
+    return res.sendStatus(404);
+  }
+
+  try {
+    const updatedFeed = await Feed.findByIdAndUpdate(id, {
+      title,
+      text,
+      photo: path,
+    });
+    return res.send(updatedFeed);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
-export const deleteFeed = async (req, res) => {
-  const { id } = req.params;
-  feeds = feeds.filter((f) => f.id !== Number(id));
-  return res.send(feeds);
+
+export const deleteFeed = async (req: Request, res: Response) => {
+  const { _id } = req.body;
+  const feeds = await Feed.findById(_id);
+  if (!feeds) {
+    return res.sendStatus(404);
+  }
+
+  try {
+    await Feed.findByIdAndDelete(_id);
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(404);
+  }
 };
