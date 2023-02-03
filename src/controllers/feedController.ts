@@ -67,7 +67,7 @@ export const deleteFeed = async (req, res) => {
 
   try {
     await Feed.findByIdAndDelete(_id);
-    return res.sendStatus('200');
+    return res.sendStatus(200);
   } catch (error) {
     return res.sendStatus(404);
   }
