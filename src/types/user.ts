@@ -5,3 +5,9 @@ export type TUser = {
   password: string;
   verifyEmail: boolean;
 };
+
+export type TUserVariables = Omit<TUser, 'verifyEmail'>;
+
+export type TCreateUserVariables = TUserVariables & {
+  callbackUrl: string;
+};
