@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import feedRouter from '../routers/feedRouter';
+import userRouter from '../routers/userRouter';
 
 const app = express();
 const logger = morgan('dev');
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 app.use(logger);
 app.use('/uploads', express.static('uploads'));
 app.use('/feed', feedRouter);
+app.use('/user', userRouter);
 
 const handleListening = () =>
   console.log(`✅ Server listening on port http://localhost:${PORT} 🚀`);
