@@ -1,6 +1,7 @@
+import { Request, Response } from 'express';
 import Feed from '../models/Feed';
 
-export const getFeeds = async (req, res) => {
+export const getFeeds = async (req: Request, res: Response) => {
   const feeds = await Feed.find({});
   try {
     return res.send(feeds);
@@ -9,7 +10,7 @@ export const getFeeds = async (req, res) => {
   }
 };
 
-export const getFeed = async (req, res) => {
+export const getFeed = async (req: Request, res: Response) => {
   const { id } = req.params;
   const feed = await Feed.findById(id);
   try {
@@ -19,7 +20,7 @@ export const getFeed = async (req, res) => {
   }
 };
 
-export const uploadFeed = async (req, res) => {
+export const uploadFeed = async (req: Request, res: Response) => {
   const { title, text } = req.body;
   const { path } = req.file;
   try {
@@ -35,7 +36,7 @@ export const uploadFeed = async (req, res) => {
   }
 };
 
-export const updateFeed = async (req, res) => {
+export const updateFeed = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { title, text } = req.body;
   const file = req.file;
@@ -58,7 +59,7 @@ export const updateFeed = async (req, res) => {
   }
 };
 
-export const deleteFeed = async (req, res) => {
+export const deleteFeed = async (req: Request, res: Response) => {
   const { _id } = req.body;
   const feeds = await Feed.findById(_id);
   if (!feeds) {
