@@ -296,3 +296,36 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
 };
+
+export const changeUsername = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization.split('Bearer ')[1];
+
+    if (!accessToken) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+
+    const payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    const { email } = payload as TTokenPayload;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(400).send({ message: FAILURE.CannotFindUser });
+      return;
+    }
+
+    const { username } = req.body;
+
+    const duplicatedUsername = await User.findOne({ username });
+    if (duplicatedUsername) {
+      return res.status(400).send({ message: '' });
+    }
+
+    await user.updateOne({ $set: { username: username } });
+    return res.status(200).send({ message: FAILURE.DuplicatedUsername });
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};

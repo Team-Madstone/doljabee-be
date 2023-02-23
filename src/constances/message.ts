@@ -20,4 +20,5 @@ export const FAILURE = {
   InvalidToken: '토큰이 유효하지 않습니다.',
   NewPasswordNotMatch: '새로운 비밀번호가 일치하지 않습니다.',
   CurrentPasswordNotMatch: '현재 비밀번호가 일치하지 않습니다.',
+  DuplicatedUsername: '이미 존재하는 닉네임입니다.',
 };
