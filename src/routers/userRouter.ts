@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createUser,
   loginUser,
+  logout,
   refreshAccessToken,
   verifyEmail,
 } from '../controllers/userController';
@@ -24,5 +25,6 @@ userRouter.post(
 userRouter.post('/verify-email', verifyEmail);
 userRouter.post('/login', loginUser);
 userRouter.post('/refresh-access-token', refreshAccessToken);
+userRouter.post('/logout', logout);
 
 export default userRouter;
