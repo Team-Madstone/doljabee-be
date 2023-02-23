@@ -10,4 +10,5 @@ export const FAILURE = {
   DeleteFeed: '피드 삭제에 실패했습니다.',
   CannotFindUser: '해당 이메일을 찾을 수 없습니다.',
   VerifyEmail: '인증에 실패했습니다.',
+  IsLogin: '로그인이 필요합니다.',
 };
