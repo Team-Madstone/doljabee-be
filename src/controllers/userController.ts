@@ -36,19 +36,19 @@ const sendVerifyEmail = ({ email, callbackUrl }: TSendVerifyEmail) => {
   transporter.sendMail(mailContent);
 };
 
-const getAccessToken = (_id: Types.ObjectId) =>
+const getAccessToken = (email: string) =>
   jwt.sign(
     {
-      _id,
+      email,
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: '15m' }
   );
 
-const getRefreshToken = (_id: Types.ObjectId) =>
+const getRefreshToken = (email: string) =>
   jwt.sign(
     {
-      _id,
+      email,
     },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: '180d' }
@@ -66,8 +66,8 @@ const sendTokens = (
   res: Response,
   message: string
 ) => {
-  const accessToken = getAccessToken(user._id);
-  const refreshToken = getRefreshToken(user._id);
+  const accessToken = getAccessToken(user.email);
+  const refreshToken = getRefreshToken(user.email);
 
   res
     .cookie('refreshToken', refreshToken, refreshAccessTokenOption)
