@@ -12,7 +12,7 @@ import {
   TUser,
 } from '../types/user';
 import { HydratedDocument, Types } from 'mongoose';
-import { resetPassword } from '../mail/resetPassword';
+import { resetPassword as resetPasswordPage } from '../mail/resetPassword';
 
 const SALT_ROUND = 10;
 
@@ -261,7 +261,7 @@ export const sendResetPasswordEmail = async (req: Request, res: Response) => {
       from: 'Doljabee',
       to: email,
       subject: 'Doljabee 비밀번호 재설정 메일입니다.',
-      html: resetPassword({
+      html: resetPasswordPage({
         callbackUrl: callbackUrl as string,
         token,
         email: email as string,
@@ -269,6 +269,29 @@ export const sendResetPasswordEmail = async (req: Request, res: Response) => {
     };
     transporter.sendMail(mailContent);
     return res.status(200).send({ message: SUCCESS.SuccessSendMail });
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, newPassword, newPasswordConfirmation } = req.body;
+    const salt = await bcrypt.genSalt(SALT_ROUND);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    if (newPassword === newPasswordConfirmation) {
+      await user.updateOne({ $set: { password: hashedPassword } });
+      return res.status(200).send({ message: SUCCESS.ChangePassword });
+    } else {
+      return res.status(400).send({ message: FAILURE.NewPasswordNotMatch });
+    }
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
