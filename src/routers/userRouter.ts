@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, verifyUser } from '../controllers/userController';
+import { createUser, verifyEmail } from '../controllers/userController';
 import { validationRule } from '../middlewares/userValidationRule';
 import { validate } from '../utils/validate';
 
@@ -16,6 +16,5 @@ userRouter.post(
   ]),
   createUser
 );
-userRouter.get('/signToken', verifyUser);
-
+userRouter.post('/verify-email', verifyEmail);
 export default userRouter;
