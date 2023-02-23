@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { DEFAULT_ERROR_MESSAGE, FAILURE, SUCCESS } from '../constances/message';
 import User from '../models/User';
 import bcrypt from 'bcrypt';
@@ -9,7 +9,9 @@ import {
   TCreateUserVariables,
   TSendVerifyEmail,
   TTokenPayload,
+  TUser,
 } from '../types/user';
+import { HydratedDocument, Types } from 'mongoose';
 
 const SALT_ROUND = 10;
 
@@ -32,6 +34,44 @@ const sendVerifyEmail = ({ email, callbackUrl }: TSendVerifyEmail) => {
     html: signup({ callbackUrl, token }),
   };
   transporter.sendMail(mailContent);
+};
+
+const getAccessToken = (_id: Types.ObjectId) =>
+  jwt.sign(
+    {
+      _id,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '15m' }
+  );
+
+const getRefreshToken = (_id: Types.ObjectId) =>
+  jwt.sign(
+    {
+      _id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '180d' }
+  );
+
+const refreshAccessTokenOption = {
+  httpOnly: true,
+  maxAge: 1000 * 60 * 60 * 24 * 180,
+  sameSite: 'none',
+  secure: true,
+} as CookieOptions;
+
+const sendTokens = (
+  user: HydratedDocument<TUser>,
+  res: Response,
+  message: string
+) => {
+  const accessToken = getAccessToken(user._id);
+  const refreshToken = getRefreshToken(user._id);
+
+  res
+    .cookie('refreshToken', refreshToken, refreshAccessTokenOption)
+    .send({ accessToken, message });
 };
 
 export const createUser = async (
@@ -98,22 +138,31 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(400).send({ message: FAILURE.WrongPassword });
     }
 
-    const accessToken = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '15m',
-    });
+    return sendTokens(user, res, SUCCESS.Login);
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
 
-    const refreshToken = jwt.sign({ email }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '180d',
-    });
+export const refreshAccessToken = async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.cookie.split('refreshToken=')[1];
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 180,
-      sameSite: 'none',
-      secure: true,
-    });
+    if (!token) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
 
-    return res.status(200).json({ accessToken });
+    const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const { email } = payload as TTokenPayload;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    return sendTokens(user, res, SUCCESS.RefreshAccessToken);
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
