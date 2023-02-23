@@ -9,6 +9,7 @@ import {
   sendResetPasswordEmail,
   verifyEmail,
 } from '../controllers/userController';
+import { resetPassword } from '../mail/resetPassword';
 import { isLogin } from '../middlewares/isLogin';
 import { validationRule } from '../middlewares/userValidationRule';
 import { validate } from '../utils/validate';
@@ -33,5 +34,6 @@ userRouter.post('/logout', logout);
 userRouter.get('/get-my-profile', isLogin, getMyProfile);
 userRouter.post('/change-password', isLogin, changePassword);
 userRouter.post('/forgot-password', sendResetPasswordEmail);
+userRouter.post('/reset-password', resetPassword);
 
 export default userRouter;
