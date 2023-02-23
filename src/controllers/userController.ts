@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { DEFAULT_ERROR_MESSAGE } from '../constances/message';
+import { DEFAULT_ERROR_MESSAGE, FAILURE, SUCCESS } from '../constances/message';
 import User from '../models/User';
 import bcrypt from 'bcrypt';
 import { signup } from '../mail/signup';
@@ -13,26 +13,25 @@ import {
 
 const SALT_ROUND = 10;
 
-const sendVerifyEmail = ({ email, callbackUrl }: TSendVerifyEmail) => {
-  try {
-    const token = jwt.sign(
-      {
-        email,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+const getVerifyEmailToken = (email: string) =>
+  jwt.sign(
+    {
+      email,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '1h' }
+  );
 
-    const mailContent = {
-      from: 'Doljabee',
-      to: email,
-      subject: 'Doljabee 회원가입 확인 메일입니다.',
-      html: signup({ callbackUrl, token }),
-    };
-    transporter.sendMail(mailContent);
-  } catch (error) {
-    console.log('회원가입 인증 메일 전송 실패');
-  }
+const sendVerifyEmail = ({ email, callbackUrl }: TSendVerifyEmail) => {
+  const token = getVerifyEmailToken(email);
+
+  const mailContent = {
+    from: 'Doljabee',
+    to: email,
+    subject: 'Doljabee 회원가입 확인 메일입니다.',
+    html: signup({ callbackUrl, token }),
+  };
+  transporter.sendMail(mailContent);
 };
 
 export const createUser = async (
@@ -53,25 +52,35 @@ export const createUser = async (
     });
 
     await user.save();
-    res.send({ message: '사용자 등록 완료' });
+    res.status(200).send({ message: SUCCESS.CreateUser });
 
-    sendVerifyEmail({ email, callbackUrl });
-    return;
+    try {
+      return sendVerifyEmail({ email, callbackUrl });
+    } catch (error) {
+      return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+    }
   } catch (error) {
-    res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
-    return;
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
 };
 
-export const verifyUser = async (req: Request, res: Response) => {
-  const token = req.query.token as string;
+export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET) as TTokenPayload;
+    const { token } = req.body;
+    const payload = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET
+    ) as TTokenPayload;
 
     const user = await User.findOne({ email: payload.email });
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
     await user.updateOne({ $set: { verifyEmail: true } });
-    res.status(200).send({ message: '인증이 완료되었습니다.' });
+    return res.status(200).send({ message: SUCCESS.VerifyEmail });
   } catch (error) {
-    res.status(405).send({ message: '인증에 실패했습니다.' });
+    return res.status(405).send({ message: FAILURE.VerifyEmail });
   }
 };
