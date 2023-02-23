@@ -74,14 +74,20 @@ const sendTokens = (
     .send({ accessToken, message });
 };
 
+const getHashedPassword = async (password: string) => {
+  const salt = await bcrypt.genSalt(SALT_ROUND);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  return hashedPassword;
+};
+
 export const createUser = async (
   req: Request<TCreateUserVariables>,
   res: Response
 ) => {
   try {
     const { name, email, username, password, callbackUrl } = req.body;
-    const salt = await bcrypt.genSalt(SALT_ROUND);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await getHashedPassword(password);
 
     const user = new User({
       name,
@@ -196,6 +202,44 @@ export const getMyProfile = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization.split('Bearer ')[1];
+
+    if (!accessToken) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+
+    const payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    const { email } = payload as TTokenPayload;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(400).send({ message: FAILURE.CannotFindUser });
+      return;
+    }
+
+    const { oldPassword, newPassword, newPasswordConfirmation } = req.body;
+    const hashedPassword = await getHashedPassword(newPassword);
+    const matchedPassword = await bcrypt.compare(oldPassword, user.password);
+
+    if (!matchedPassword) {
+      return res.status(400).send({ message: FAILURE.CurrentPasswordNotMatch });
+    }
+
+    if (newPassword !== newPasswordConfirmation) {
+      return res.status(400).send({ message: FAILURE.NewPasswordNotMatch });
+    } else {
+      await user.updateOne({ $set: { password: hashedPassword } });
+      return res.status(200).send({ message: SUCCESS.ChangePassword });
+    }
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
