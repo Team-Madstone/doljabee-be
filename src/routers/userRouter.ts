@@ -1,5 +1,9 @@
 import express from 'express';
-import { createUser, verifyEmail } from '../controllers/userController';
+import {
+  createUser,
+  loginUser,
+  verifyEmail,
+} from '../controllers/userController';
 import { validationRule } from '../middlewares/userValidationRule';
 import { validate } from '../utils/validate';
 
@@ -17,4 +21,5 @@ userRouter.post(
   createUser
 );
 userRouter.post('/verify-email', verifyEmail);
+userRouter.post('/login', loginUser);
 export default userRouter;
