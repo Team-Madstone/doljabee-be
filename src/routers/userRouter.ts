@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   changePassword,
+  changeUsername,
   createUser,
   getMyProfile,
   loginUser,
@@ -35,5 +36,6 @@ userRouter.get('/get-my-profile', isLogin, getMyProfile);
 userRouter.post('/change-password', isLogin, changePassword);
 userRouter.post('/forgot-password', sendResetPasswordEmail);
 userRouter.post('/reset-password', resetPassword);
+userRouter.post('/change-username', isLogin, changeUsername);
 
 export default userRouter;
