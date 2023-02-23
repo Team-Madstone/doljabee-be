@@ -6,6 +6,7 @@ import {
   loginUser,
   logout,
   refreshAccessToken,
+  sendResetPasswordEmail,
   verifyEmail,
 } from '../controllers/userController';
 import { isLogin } from '../middlewares/isLogin';
@@ -31,5 +32,6 @@ userRouter.post('/refresh-access-token', refreshAccessToken);
 userRouter.post('/logout', logout);
 userRouter.get('/get-my-profile', isLogin, getMyProfile);
 userRouter.post('/change-password', isLogin, changePassword);
+userRouter.post('/forgot-password', sendResetPasswordEmail);
 
 export default userRouter;
