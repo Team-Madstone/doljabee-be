@@ -329,3 +329,32 @@ export const changeUsername = async (req: Request, res: Response) => {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
 };
+
+export const resendVerifyEmail = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization.split('Bearer ')[1];
+
+    if (!accessToken) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+
+    const payload = jwt.verify(
+      accessToken,
+      process.env.ACCESS_TOKEN_SECRET
+    ) as TTokenPayload;
+
+    const { email } = payload;
+    const user = await User.findOne({ email });
+
+    const { callbackUrl } = req.body;
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    sendVerifyEmail({ email, callbackUrl });
+    return res.status(200).send({ message: SUCCESS.SuccessSendMail });
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
