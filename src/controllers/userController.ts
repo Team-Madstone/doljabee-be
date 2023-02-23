@@ -84,3 +84,37 @@ export const verifyEmail = async (req: Request, res: Response) => {
     return res.status(405).send({ message: FAILURE.VerifyEmail });
   }
 };
+
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    const matchedPassword = await bcrypt.compare(password, user.password);
+    if (!matchedPassword) {
+      return res.status(400).send({ message: FAILURE.WrongPassword });
+    }
+
+    const accessToken = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: '15m',
+    });
+
+    const refreshToken = jwt.sign({ email }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: '180d',
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 180,
+      sameSite: 'none',
+      secure: true,
+    });
+
+    return res.status(200).json({ accessToken });
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};

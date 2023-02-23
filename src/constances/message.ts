@@ -11,4 +11,5 @@ export const FAILURE = {
   CannotFindUser: '해당 이메일을 찾을 수 없습니다.',
   VerifyEmail: '인증에 실패했습니다.',
   IsLogin: '로그인이 필요합니다.',
+  WrongPassword: '비밀번호가 일치하지 않습니다.',
 };
