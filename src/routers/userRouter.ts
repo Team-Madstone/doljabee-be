@@ -7,6 +7,7 @@ import {
   loginUser,
   logout,
   refreshAccessToken,
+  resendVerifyEmail,
   sendResetPasswordEmail,
   verifyEmail,
 } from '../controllers/userController';
@@ -37,5 +38,6 @@ userRouter.post('/change-password', isLogin, changePassword);
 userRouter.post('/forgot-password', sendResetPasswordEmail);
 userRouter.post('/reset-password', resetPassword);
 userRouter.post('/change-username', isLogin, changeUsername);
+userRouter.post('/resend-verify-email', isLogin, resendVerifyEmail);
 
 export default userRouter;
