@@ -5,6 +5,7 @@ export const SUCCESS = {
   VerifyEmail: '인증이 완료되었습니다.',
   Login: '로그인이 완료되었습니다.',
   RefreshAccessToken: '액세스 토큰 재발급 성공했습니다.',
+  Logout: '로그아웃이 완료되었습니다.',
 };
 
 export const FAILURE = {

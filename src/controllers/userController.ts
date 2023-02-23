@@ -167,3 +167,12 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
 };
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie('refreshToken');
+
+  return res.status(200).send({
+    message: SUCCESS.Logout,
+    accessToken: req.headers.authorization,
+  });
+};
