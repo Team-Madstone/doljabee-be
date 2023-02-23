@@ -176,3 +176,27 @@ export const logout = (req: Request, res: Response) => {
     accessToken: req.headers.authorization,
   });
 };
+
+export const getMyProfile = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization.split('Bearer ')[1];
+
+    if (!accessToken) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+
+    const payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    const { email } = payload as TTokenPayload;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
