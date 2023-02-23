@@ -12,6 +12,7 @@ import {
   TUser,
 } from '../types/user';
 import { HydratedDocument, Types } from 'mongoose';
+import { resetPassword } from '../mail/resetPassword';
 
 const SALT_ROUND = 10;
 
@@ -240,6 +241,34 @@ export const changePassword = async (req: Request, res: Response) => {
       await user.updateOne({ $set: { password: hashedPassword } });
       return res.status(200).send({ message: SUCCESS.ChangePassword });
     }
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
+
+export const sendResetPasswordEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, callbackUrl } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    const token = getVerifyEmailToken(email as string);
+
+    const mailContent = {
+      from: 'Doljabee',
+      to: email,
+      subject: 'Doljabee 비밀번호 재설정 메일입니다.',
+      html: resetPassword({
+        callbackUrl: callbackUrl as string,
+        token,
+        email: email as string,
+      }),
+    };
+    transporter.sendMail(mailContent);
+    return res.status(200).send({ message: SUCCESS.SuccessSendMail });
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }

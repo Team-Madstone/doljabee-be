@@ -25,3 +25,7 @@ export type TSignupVariables = {
 export type TTokenPayload = {
   email: string;
 };
+
+export type TResetPassword = TSignupVariables & {
+  email: string;
+};

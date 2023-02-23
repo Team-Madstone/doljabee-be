@@ -7,6 +7,7 @@ export const SUCCESS = {
   RefreshAccessToken: '액세스 토큰 재발급 성공했습니다.',
   Logout: '로그아웃이 완료되었습니다.',
   ChangePassword: '비밀번호를 변경했습니다.',
+  SuccessSendMail: '메일 전송이 성공했습니다.',
 };
 
 export const FAILURE = {
