@@ -5,7 +5,9 @@ const feedSchema = new mongoose.Schema({
   text: { type: String, required: true, trim: true, minLength: 3 },
   photo: { type: String },
   createdAt: { type: Date, required: true, default: Date.now },
-  likes: { type: Number },
+  likes: [
+    { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Like' },
+  ],
 });
 
 const Feed = mongoose.model('Feed', feedSchema);
