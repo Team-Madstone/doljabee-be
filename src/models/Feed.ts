@@ -8,6 +8,10 @@ const feedSchema = new mongoose.Schema({
   likes: [
     { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Like' },
   ],
+  comments: [
+    { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Comment' },
+  ],
+  owner: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
 });
 
 const Feed = mongoose.model('Feed', feedSchema);
