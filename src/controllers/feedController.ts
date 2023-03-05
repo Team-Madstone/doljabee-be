@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { DEFAULT_ERROR_MESSAGE, FAILURE } from '../constances/message';
 import Feed from '../models/Feed';
+import jwt from 'jsonwebtoken';
+import { TTokenPayload } from '../types/user';
+import User from '../models/User';
 
 export const getFeeds = async (req: Request, res: Response) => {
   try {
@@ -43,12 +46,22 @@ export const uploadFeed = async (req: Request, res: Response) => {
     // req.file은 multer가 파일을 업로드 했을 때만 생성됨.
     // path는 optional하기 때문에 구조분해할당 불가
     const path = req.file?.path;
+    const accessToken = req.headers.authorization.split('Bearer ')[1];
+
+    if (!accessToken) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+
+    const payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    const { email } = payload as TTokenPayload;
+    const { _id } = await User.findOne({ email });
 
     const newFeed = await Feed.create({
       title,
       text,
       photo: path,
-      likes: 0,
+      owner: _id,
     });
 
     return res.status(200).send(newFeed);
