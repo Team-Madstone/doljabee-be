@@ -11,7 +11,7 @@ import {
   TTokenPayload,
   TUser,
 } from '../types/user';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { resetPassword as resetPasswordPage } from '../mail/resetPassword';
 
 const SALT_ROUND = 10;
@@ -153,23 +153,27 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
-    const token = req.headers.cookie.split('refreshToken=')[1];
+    const token = req.headers.cookie?.split('refreshToken=')[1];
 
     if (!token) {
       return res.status(401).send({ message: FAILURE.InvalidToken });
     }
 
-    const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    try {
+      const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-    const { email } = payload as TTokenPayload;
+      const { email } = payload as TTokenPayload;
 
-    const user = await User.findOne({ email });
+      const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(400).send({ message: FAILURE.CannotFindUser });
+      if (!user) {
+        return res.status(400).send({ message: FAILURE.CannotFindUser });
+      }
+
+      return sendTokens(user, res, SUCCESS.RefreshAccessToken);
+    } catch (error) {
+      return res.status(401).send({ message: FAILURE.IsLogin });
     }
-
-    return sendTokens(user, res, SUCCESS.RefreshAccessToken);
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
