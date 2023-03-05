@@ -8,6 +8,7 @@ export const SUCCESS = {
   Logout: '로그아웃이 완료되었습니다.',
   ChangePassword: '비밀번호를 변경했습니다.',
   SuccessSendMail: '메일 전송이 성공했습니다.',
+  Ok: 'ok',
 };
 
 export const FAILURE = {
@@ -21,4 +22,5 @@ export const FAILURE = {
   NewPasswordNotMatch: '새로운 비밀번호가 일치하지 않습니다.',
   CurrentPasswordNotMatch: '현재 비밀번호가 일치하지 않습니다.',
   DuplicatedUsername: '이미 존재하는 닉네임입니다.',
+  CannotFindFeed: '해당 피드를 찾을 수 없습니다.',
 };

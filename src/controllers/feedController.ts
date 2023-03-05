@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { DEFAULT_ERROR_MESSAGE, FAILURE } from '../constances/message';
+import { DEFAULT_ERROR_MESSAGE, FAILURE, SUCCESS } from '../constances/message';
 import Feed from '../models/Feed';
 import jwt from 'jsonwebtoken';
 import { TTokenPayload } from '../types/user';
@@ -110,6 +110,44 @@ export const deleteFeed = async (req: Request, res: Response) => {
     await Feed.findByIdAndDelete(_id);
 
     return res.status(200).send(feed);
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
+
+export const toggleLikeFeed = async (req: Request, res: Response) => {
+  try {
+    const { email, feedId } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    const feed = await Feed.findOne({ _id: feedId });
+    if (!feed) {
+      return res.status(400).send({ message: FAILURE.CannotFindFeed });
+    }
+
+    const isLiked = await Like.findOne({ user: user._id, feed: feedId });
+
+    if (isLiked) {
+      const newLikes = feed.likes.filter(
+        (item) => item.toString() !== isLiked._id.toString()
+      );
+      feed.likes = newLikes;
+      await feed.save();
+      await Like.deleteOne(isLiked._id);
+    } else {
+      const like = await Like.create({
+        user,
+        feed: feedId,
+      });
+      feed.likes.push(like._id);
+      await feed.save();
+    }
+
+    return res.status(200).send({ message: SUCCESS.Ok });
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
