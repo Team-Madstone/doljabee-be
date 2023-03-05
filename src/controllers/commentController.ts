@@ -3,6 +3,8 @@ import { DEFAULT_ERROR_MESSAGE, FAILURE, SUCCESS } from '../constances/message';
 import Comment from '../models/Comment';
 import Feed from '../models/Feed';
 import User from '../models/User';
+import jwt from 'jsonwebtoken';
+import { TTokenPayload } from '../types/user';
 
 export const createComment = async (req: Request, res: Response) => {
   try {
@@ -66,6 +68,42 @@ export const deleteComment = async (req: Request, res: Response) => {
     }
 
     return res.status(200).send({ message: SUCCESS.Ok });
+  } catch (error) {
+    return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
+  }
+};
+
+export const editComment = async (req: Request, res: Response) => {
+  try {
+    const { chosenCommentId, editComment, email: reqUser } = req.body;
+
+    const editReqUser = await User.findOne({ reqUser });
+
+    if (!editReqUser) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    const token = req.headers.cookie?.split('refreshToken=')[1];
+    if (!token) {
+      return res.status(401).send({ message: FAILURE.InvalidToken });
+    }
+    const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const { email: loginUser } = payload as TTokenPayload;
+
+    const user = await User.findOne({ loginUser });
+
+    if (!user) {
+      return res.status(400).send({ message: FAILURE.CannotFindUser });
+    }
+
+    if (editReqUser._id.toString() === user._id.toString()) {
+      const updateComment = await Comment.findByIdAndUpdate(chosenCommentId, {
+        text: editComment,
+      });
+
+      return res.status(200).send(updateComment);
+    }
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
