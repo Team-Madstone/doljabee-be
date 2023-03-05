@@ -5,7 +5,11 @@ import Feed from '../models/Feed';
 
 export const getFeeds = async (req: Request, res: Response) => {
   try {
-    const feeds = await Feed.find({});
+    const feeds = await Feed.find({})
+      .sort({ createdAt: -1 })
+      .populate('likes')
+      .populate('comments');
+
     return res.status(200).send(feeds);
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
