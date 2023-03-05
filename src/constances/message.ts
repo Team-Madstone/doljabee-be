@@ -23,4 +23,5 @@ export const FAILURE = {
   CurrentPasswordNotMatch: '현재 비밀번호가 일치하지 않습니다.',
   DuplicatedUsername: '이미 존재하는 닉네임입니다.',
   CannotFindFeed: '해당 피드를 찾을 수 없습니다.',
+  CannotFindComment: '해당 댓글을 찾을 수 없습니다.',
 };
