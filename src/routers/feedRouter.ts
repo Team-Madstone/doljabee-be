@@ -5,6 +5,7 @@ import {
   getFeed,
   deleteFeed,
   updateFeed,
+  toggleLikeFeed,
 } from '../controllers/feedController';
 import { isLogin } from '../middlewares/isLogin';
 import { photoUpload } from '../server/middlewares';
@@ -16,5 +17,6 @@ feedRouter.get('/:id', getFeed);
 feedRouter.post('/', isLogin, photoUpload.single('photo'), uploadFeed);
 feedRouter.put('/:id', isLogin, photoUpload.single('photo'), updateFeed);
 feedRouter.delete('/', isLogin, deleteFeed);
+feedRouter.post('/like', isLogin, toggleLikeFeed);
 
 export default feedRouter;
