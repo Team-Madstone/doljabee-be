@@ -24,7 +24,12 @@ export const getFeed = async (req: Request, res: Response) => {
       return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
     }
 
-    const feed = await Feed.findById(id);
+    const feed = await Feed.findById(id)
+      .populate('likes')
+      .populate({
+        path: 'comments',
+        options: { sort: { createdAt: -1 } },
+      });
 
     return res.status(200).send(feed);
   } catch (error) {
