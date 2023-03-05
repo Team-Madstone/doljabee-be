@@ -5,6 +5,7 @@ import Feed from '../models/Feed';
 import jwt from 'jsonwebtoken';
 import { TTokenPayload } from '../types/user';
 import User from '../models/User';
+import Like from '../models/Like';
 
 export const getFeeds = async (req: Request, res: Response) => {
   try {
@@ -98,14 +99,17 @@ export const updateFeed = async (req: Request, res: Response) => {
 export const deleteFeed = async (req: Request, res: Response) => {
   try {
     const { _id } = req.body;
-    const feeds = await Feed.findById(_id);
+    const feed = await Feed.findById(_id);
 
-    if (!feeds) {
-      return res.sendStatus(400).send({ message: FAILURE.DeleteFeed });
+    if (!feed) {
+      return res.status(400).send({ message: FAILURE.DeleteFeed });
     }
 
+    feed.likes.forEach(async (likeId) => await Like.findByIdAndDelete(likeId));
+
     await Feed.findByIdAndDelete(_id);
-    return res.status(200);
+
+    return res.status(200).send(feed);
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
