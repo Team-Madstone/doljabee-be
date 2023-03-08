@@ -10,12 +10,34 @@ import Comment from '../models/Comment';
 
 export const getFeeds = async (req: Request, res: Response) => {
   try {
-    const feeds = await Feed.find({})
-      .sort({ createdAt: -1 })
-      .populate('likes')
-      .populate('comments');
+    const limit = req.query.limit || 5;
+    const cursor = req.query.cursor;
 
-    return res.status(200).send(feeds);
+    const feeds = await Feed.find(
+      cursor
+        ? {
+            _id: {
+              $lt: new mongoose.Types.ObjectId(cursor as string),
+            },
+          }
+        : {}
+    )
+      .limit(Number(limit) + 1)
+      .sort({ _id: -1 })
+      .populate('likes')
+      .populate('comments')
+      .populate('owner');
+
+    const isEnd = feeds.length <= Number(limit);
+
+    !isEnd && feeds.pop();
+
+    const nextCursor = isEnd ? null : feeds[feeds.length - 1]?._id;
+
+    return res.status(200).send({
+      items: feeds,
+      nextCursor,
+    });
   } catch (error) {
     return res.status(500).send({ message: DEFAULT_ERROR_MESSAGE });
   }
@@ -34,7 +56,8 @@ export const getFeed = async (req: Request, res: Response) => {
       .populate({
         path: 'comments',
         options: { sort: { createdAt: -1 } },
-      });
+      })
+      .populate('owner');
 
     return res.status(200).send(feed);
   } catch (error) {
