@@ -68,6 +68,7 @@
 * [Toy Project 기록하기 8. 로그인 2. 전역 상태 똑똑하게 공유하기 with Context API](https://jihye-dev.tistory.com/66)
 * [Toy Project 기록하기 9. React-Query로 서버 상태 관리하기](https://jihye-dev.tistory.com/67)
 * [Toy Project 기록하기 10. React-Query로 무한스크롤 구현하기](https://jihye-dev.tistory.com/68)
+* [Toy Project 기록하기 11. 프로젝트를 마치며](https://jihye-dev.tistory.com/69)
 
 <br>
 <br>
