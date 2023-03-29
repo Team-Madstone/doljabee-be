@@ -65,7 +65,7 @@
 * [Toy Project 기록하기 5. 세션 인증 방식 vs 토큰 인증 방식](https://jihye-dev.tistory.com/63)
 * [Toy Project 기록하기 6. 회원가입 & 이메일 인증하기](https://jihye-dev.tistory.com/64)
 * [Toy Project 기록하기 7. 로그인 1. jwt로 로그인 구현하기](https://jihye-dev.tistory.com/65)
-* [Toy Project 기록하기 8. 로그인 2. 전역 상태 똑똑하게 공유하기](https://jihye-dev.tistory.com/66)
+* [Toy Project 기록하기 8. 로그인 2. 전역 상태 똑똑하게 공유하기 with Context API](https://jihye-dev.tistory.com/66)
 * [Toy Project 기록하기 9. React-Query로 서버 상태 관리하기](https://jihye-dev.tistory.com/67)
 * [Toy Project 기록하기 10. React-Query로 무한스크롤 구현하기](https://jihye-dev.tistory.com/68)
 
